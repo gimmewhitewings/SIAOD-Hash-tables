@@ -193,7 +193,7 @@ inline void HashTable::printTable()
 		<< setw(10) << "returnDate" << verticalDelimeter << endl;
 	cout << horizontalDelimeter << endl;
 
-	for (int i = 0; i < size; i++)
+	for (size_t i = 0; i < size; i++)
 	{
 		cout << "| " << setw(indexFieldSize)
 			<< i + 1 << verticalDelimeter;

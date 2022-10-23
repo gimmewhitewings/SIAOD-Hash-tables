@@ -63,30 +63,6 @@ void binToTxt(string txtFileName, string binFileName) {
 	binFile.close();
 }
 
-// print bin file
-//void printBinFile(string binFileName) {
-//	ifstream binFile(binFileName);
-//	if (binFile.good())
-//	{
-//		libraryCard newCard;
-//		binFile.read((char*)&newCard, sizeof(libraryCard));
-//		cout << newCard.number << '\n'
-//			<< newCard.inventoryNumber << '\n'
-//			<< newCard.issueDate << '\n'
-//			<< newCard.returnDate;
-//		while (!binFile.eof())
-//		{
-//			cout << '\n';
-//			binFile.read((char*)&newCard, sizeof(libraryCard));
-//			cout << newCard.number << '\n'
-//				<< newCard.inventoryNumber << '\n'
-//				<< newCard.issueDate << '\n'
-//				<< newCard.returnDate;
-//		}
-//	}
-//	binFile.close();
-//}
-
 void printBinFile(string binFileName) {
 	ifstream binFile(binFileName, ios::in | ios::binary);
 	libraryCard card;
@@ -121,35 +97,36 @@ string getCardByNumber(string binFileName, int number)
 	return "Запись с таким номером не найдена";
 }
 
-// get card ptr by number
-//libraryCard* getCardPtrByNumber(string binFileName, int number)
-//{
-//	ifstream binFile(binFileName);
-//	libraryCard* card = new libraryCard;
-//	binFile.seekg(sizeof(libraryCard) * (number - 1), ios::beg);
-//	if (binFile.read((char*)card, sizeof(libraryCard))) // Проверка на существование записи с таким порядковым номером в файле
-//	{
-//		binFile.close();
-//		return card;
-//	}
-//	binFile.close();
-//	return nullptr;
-//}
-
-
-libraryCard* getCard(string binFileName, int number)
+ // get card ptr by number
+libraryCard* getCardPtrByNumber(string binFileName, int number)
 {
 	ifstream binFile(binFileName);
-	libraryCard card;
-	binFile.seekg(sizeof(card) * (number - 1), ios::beg);
-	if (binFile.read((char*)&card, sizeof(libraryCard)))
+	libraryCard* card = new libraryCard;
+	binFile.seekg(sizeof(libraryCard) * (number - 1), ios::beg);
+	if (binFile.read((char*)card, sizeof(libraryCard))) // Проверка на существование записи с таким порядковым номером в файле
 	{
 		binFile.close();
-		return &card;
+		return card;
 	}
 	binFile.close();
 	return nullptr;
 }
+
+
+//libraryCard* getCard(string binFileName, int number)
+//{
+//	ifstream binFile(binFileName);
+//	libraryCard card;
+//	binFile.clear();
+//	binFile.seekg(sizeof(card) * (number - 1), ios::beg);
+//	if (binFile.read((char*)&card, sizeof(libraryCard)))
+//	{
+//		binFile.close();
+//		return &card;
+//	}
+//	binFile.close();
+//	return nullptr;
+//}
 
 libraryCard* getCardByKeys(string binFileName, int number, int inventoryNumber) 
 {
