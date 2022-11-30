@@ -38,7 +38,7 @@ private:
     unsigned closedAddresses = 0;
     HashTableRow *table;
 
-    int firstHash(int key, unsigned size);
+    static int firstHash(int key, unsigned tableSize);
 
     static int secondHash(int key, unsigned size);
 
@@ -49,7 +49,7 @@ private:
 public:
     HashTable(unsigned size);
 
-    void insertElement(libraryCard *libraryCard);
+    void insertElement(LibraryCard *libraryCard);
 
     HashTableRow *getElement(int key);
 
@@ -61,7 +61,7 @@ public:
 };
 
 // folding hash
-int HashTable::firstHash(int key, unsigned size) {
+int HashTable::firstHash(int key, unsigned tableSize) {
     int hash = 0;
     int keyLength = 0;
     int keyCopy = key;
@@ -81,7 +81,7 @@ int HashTable::firstHash(int key, unsigned size) {
             hash += keyArray[i];
     }
     delete[] keyArray;
-    return hash % size;
+    return hash % tableSize;
 }
 
 // second hash
@@ -97,9 +97,9 @@ inline void HashTable::resizeTable() {
     closedAddresses = 0;
     for (unsigned i = 0; i < oldSize; i++) {
         if (oldTable[i].keyInventoryNumber != 0) {
-            libraryCard card;
+            LibraryCard card;
             card.inventoryNumber = oldTable[i].keyInventoryNumber;
-            card.number = oldTable[i].number;
+            card.bookNumber = oldTable[i].number;
             strcpy_s(card.issueDate, oldTable[i].issueDate);
             strcpy_s(card.returnDate, oldTable[i].returnDate);
             insertElement(&card);
@@ -113,22 +113,20 @@ HashTable::HashTable(unsigned size) {
     table = new HashTableRow[size];
 }
 
-void HashTable::insertElement(libraryCard *libraryCard) {
+void HashTable::insertElement(LibraryCard *libraryCard) {
     HashTableRow *currentElement = new HashTableRow(
             libraryCard->inventoryNumber,
-            libraryCard->number,
+            libraryCard->bookNumber,
             libraryCard->issueDate,
             libraryCard->returnDate
     );
 
-    int iters = 0;
     int key = currentElement->keyInventoryNumber;
     int index = firstHash(key, size);
     int second = secondHash(key, size);
 
     while (table[index].keyInventoryNumber > 0) {
         index = (index + second) % size;
-        iters++;
     }
 
     table[index] = *currentElement;
@@ -141,11 +139,12 @@ void HashTable::insertElement(libraryCard *libraryCard) {
 
 inline HashTableRow *HashTable::getElement(int key) {
     int index = firstHash(key, size);
+    int second = secondHash(key, size);
     while (table[index].keyInventoryNumber > 0) {
         if (table[index].keyInventoryNumber == key) {
             return &table[index];
         } else {
-            index = (index + secondHash(key, this->size)) % this->size;
+            index = (index + second) % size;
         }
     }
     return nullptr;

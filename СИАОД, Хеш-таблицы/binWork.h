@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fstream>
+#include <random>
 #include <string>
 #include <istream>
 #include <iostream>
@@ -9,51 +10,63 @@
 
 using namespace std;
 
-struct libraryCard {
-    int number;
+struct LibraryCard {
     int inventoryNumber;
-    char issueDate[11];
-    char returnDate[11];
+    int bookNumber;
+    char issueDate[11]{};
+    char returnDate[11]{};
+
+    LibraryCard(int inventoryNumber, int bookNumber, const char *issueDate, const char *returnDate) {
+        this->inventoryNumber = inventoryNumber;
+        this->bookNumber = bookNumber;
+        strcpy_s(this->issueDate, issueDate);
+        strcpy_s(this->returnDate, returnDate);
+    }
+
+    LibraryCard() {
+        this->inventoryNumber = 0;
+        this->bookNumber = 0;
+        this->issueDate[10] = '\0';
+        this->returnDate[10] = '\0';
+    }
 };
 
-void txtToBin(const string& txtFileName, const string& binFileName) {
+void txtToBin(const string &txtFileName, const string &binFileName) {
     ifstream txtFile(txtFileName);
     ofstream binFile(binFileName);
     while (!txtFile.eof()) {
-        libraryCard newCard{};
-        int number;
-        int inventoryNumber;
+        LibraryCard newCard{};
         string issueDate;
         string returnDate;
 
-        txtFile >> newCard.number;
         txtFile >> newCard.inventoryNumber;
+        txtFile >> newCard.bookNumber;
         txtFile.get();
         getline(txtFile, issueDate);
         getline(txtFile, returnDate);
         strcpy_s(newCard.issueDate, issueDate.c_str());
         strcpy_s(newCard.returnDate, returnDate.c_str());
-        binFile.write((char *) &newCard, sizeof(libraryCard));
+        binFile.write((char *) &newCard, sizeof(LibraryCard));
     }
     txtFile.close();
     binFile.close();
 }
 
-void binToTxt(const string& txtFileName, const string& binFileName) {
+void binToTxt(const string &txtFileName, const string &binFileName) {
     ofstream txtFile(txtFileName);
     ifstream binFile(binFileName);
     if (binFile.good()) {
-        libraryCard newCard{};
-        binFile.read((char *) &newCard, sizeof(libraryCard));
-        txtFile << newCard.number << '\n'
-                << newCard.inventoryNumber << '\n'
+        LibraryCard newCard{};
+        binFile.read((char *) &newCard, sizeof(LibraryCard));
+        txtFile << newCard.inventoryNumber << '\n'
+                << newCard.bookNumber << '\n'
                 << newCard.issueDate << '\n'
                 << newCard.returnDate;
         while (!binFile.eof()) {
             txtFile << '\n';
-            binFile.read((char *) &newCard, sizeof(libraryCard));
-            txtFile << newCard.number << '\n'
-                    << newCard.inventoryNumber << '\n'
+            binFile.read((char *) &newCard, sizeof(LibraryCard));
+            txtFile << newCard.inventoryNumber << '\n'
+                    << newCard.bookNumber << '\n'
                     << newCard.issueDate << '\n'
                     << newCard.returnDate;
         }
@@ -62,30 +75,30 @@ void binToTxt(const string& txtFileName, const string& binFileName) {
     binFile.close();
 }
 
-void printBinFile(const string& binFileName) {
+void printBinFile(const string &binFileName) {
     ifstream binFile(binFileName, ios::in | ios::binary);
-    libraryCard card{};
+    LibraryCard card{};
     binFile.seekg(0, ios::beg);
-    binFile.read((char *) &card, sizeof(libraryCard));
+    binFile.read((char *) &card, sizeof(LibraryCard));
     while (!binFile.eof()) {
-        cout << card.number << '\n'
-             << card.inventoryNumber << '\n'
+        cout << card.inventoryNumber << '\n'
+             << card.bookNumber << '\n'
              << card.issueDate << '\n'
              << card.returnDate << '\n';
-        binFile.read((char *) &card, sizeof(libraryCard));
+        binFile.read((char *) &card, sizeof(LibraryCard));
     }
 }
 
-string getCardByNumber(const string& binFileName, int number) {
+string getCardDataByNumber(const string &binFileName, int number) {
     ifstream binFile(binFileName);
-    libraryCard card{};
+    LibraryCard card{};
     string result;
     binFile.seekg(0, ios::beg);
     binFile.seekg(sizeof(card) * (number - 1), ios::beg);
     if (binFile.read((char *) &card,
-                     sizeof(libraryCard))) // Проверка на существование записи с таким порядковым номером в файле
+                     sizeof(LibraryCard))) // Проверка на существование записи с таким порядковым номером в файле
     {
-        result = to_string(card.number) + '\n'
+        result = to_string(card.bookNumber) + '\n'
                  + to_string(card.inventoryNumber) + '\n'
                  + card.issueDate + '\n'
                  + card.returnDate;
@@ -96,13 +109,12 @@ string getCardByNumber(const string& binFileName, int number) {
     return "Запись с таким номером не найдена";
 }
 
-// get card ptr by number
-libraryCard *getCardPtrByNumber(const string& binFileName, int number) {
+LibraryCard *getCardPtrByNumber(const string &binFileName, int number) {
     ifstream binFile(binFileName, ios::in | ios::binary);
-    libraryCard *card = new libraryCard;
-    binFile.seekg(sizeof(libraryCard) * (number - 1), ios::beg);
+    LibraryCard *card = new LibraryCard;
+    binFile.seekg(sizeof(LibraryCard) * (number - 1), ios::beg);
     if (binFile.read((char *) card,
-                     sizeof(libraryCard))) // Проверка на существование записи с таким порядковым номером в файле
+                     sizeof(LibraryCard))) // Проверка на существование записи с таким порядковым номером в файле
     {
         binFile.close();
         return card;
@@ -111,52 +123,37 @@ libraryCard *getCardPtrByNumber(const string& binFileName, int number) {
     return nullptr;
 }
 
-// get card ptr by inventory number
-libraryCard *getCardPtrByKey(const string& binFileName, int inventoryNumber) {
+LibraryCard *getCardPtrByKey(const string &binFileName, int inventoryNumber) {
     ifstream binFile(binFileName, ios::in | ios::binary);
-    libraryCard *card = new libraryCard;
+    LibraryCard *card = new LibraryCard;
     binFile.seekg(0, ios::beg);
-    binFile.read((char *) card, sizeof(libraryCard));
+    binFile.read((char *) card, sizeof(LibraryCard));
     while (!binFile.eof()) {
         if (card->inventoryNumber == inventoryNumber) {
             binFile.close();
             return card;
         }
-        binFile.read((char *) card, sizeof(libraryCard));
+        binFile.read((char *) card, sizeof(LibraryCard));
     }
     binFile.close();
     return nullptr;
 }
 
-libraryCard *getCardByKeys(const string& binFileName, int number, int inventoryNumber) {
-    ifstream binFile(binFileName);
-    libraryCard card;
-    while (binFile.good()) {
-        binFile.read((char *) &card, sizeof(libraryCard));
-        if (card.number == number && card.inventoryNumber == inventoryNumber) {
-            binFile.close();
-            return &card;
-        }
-    }
-    binFile.close();
-    return nullptr;
-}
-
-bool deleteCardByKey(const string& binFileName, int key) {
-    libraryCard lastCard{};
-    libraryCard currentCard{};
+bool deleteCardByKey(const string &binFileName, int key) {
+    LibraryCard lastCard{};
+    LibraryCard currentCard{};
     fstream binFile(binFileName, ios::in | ios::out | ios::binary);
-    binFile.seekg(-(int) sizeof(libraryCard), ios::end); // Перемещаемся на позицию перед последней записью
-    binFile.read((char *) &lastCard, sizeof(libraryCard)); // Считываем значение последней карточки
+    binFile.seekg(-(int) sizeof(LibraryCard), ios::end); // Перемещаемся на позицию перед последней записью
+    binFile.read((char *) &lastCard, sizeof(LibraryCard)); // Считываем значение последней карточки
     binFile.seekg(0, ios::beg); // Перемещаемся в начало файла
     while (binFile.good()) {
         // Считываем по очереди записи в файле
-        binFile.read((char *) &currentCard, sizeof(libraryCard));
-        if (currentCard.number == key) // Если нашли подходящую по ключу запись
+        binFile.read((char *) &currentCard, sizeof(LibraryCard));
+        if (currentCard.inventoryNumber == key) // Если нашли подходящую по ключу запись
         {
-            binFile.seekg(-(int) (sizeof(libraryCard)), ios::cur); // Возвращаемся на одну позицию назад
+            binFile.seekg(-(int) (sizeof(LibraryCard)), ios::cur); // Возвращаемся на одну позицию назад
             binFile.write(reinterpret_cast<const char *>(&lastCard),
-                          sizeof(libraryCard)); // Записываем значение последеней записи с заменой текущих данных
+                          sizeof(LibraryCard)); // Записываем значение последеней записи с заменой текущих данных
             binFile.close();
             return true;
         }
@@ -164,53 +161,6 @@ bool deleteCardByKey(const string& binFileName, int key) {
     // Если ничего не нашлось, закрываем файл и возвращаем отрицательный результат выполнения функции
     binFile.close();
     return false;
-}
-
-bool deleteCardByNumber(const string& binFileName, int number) {
-    libraryCard lastCard{};
-    libraryCard currentCard{};
-    fstream binFile(binFileName, ios::in | ios::out | ios::binary);
-    binFile.seekg(-(int) sizeof(libraryCard), ios::end); // Перемещаемся на позицию перед последней записью
-    binFile.read((char *) &lastCard, sizeof(libraryCard)); // Считываем значение последней карточки
-    binFile.seekg(0, ios::beg); // Перемещаемся в начало файла
-    binFile.seekg(sizeof(libraryCard) * (number - 1),
-                  ios::beg); // Перемещаемся на позицию перед записью с нужным номером
-    binFile.write(reinterpret_cast<const char *>(&lastCard),
-                  sizeof(libraryCard)); // Записываем значение последеней записи с заменой текущих данных
-    binFile.close();
-    return true;
-}
-
-void expiredBooks(const string& originFileName, const string& targetFileName, string currentDate) {
-    ifstream originFile(originFileName);
-    ofstream targetFile(targetFileName);
-    libraryCard card;
-    originFile.read((char *) &card, sizeof(libraryCard));
-    while (originFile.good()) {
-        if (card.returnDate < currentDate) {
-            targetFile.write((char *) &card, sizeof(libraryCard));
-        }
-        originFile.read((char *) &card, sizeof(libraryCard));
-    }
-    originFile.close();
-    targetFile.close();
-}
-
-void deleteReturnedBooks(const string& binFileName, string currentDate) {
-    ifstream binFile(binFileName, ios::binary);
-    libraryCard card;
-    ofstream tempBinFile("tempBin.dat", ios::binary);
-    binFile.read((char *) &card, sizeof(libraryCard));
-    while (binFile.good()) {
-        if (card.returnDate >= currentDate) {
-            tempBinFile.write((char *) &card, sizeof(libraryCard));
-        }
-        binFile.read((char *) &card, sizeof(libraryCard));
-    }
-    binFile.close();
-    remove(binFileName.c_str());
-    tempBinFile.close();
-    rename("tempBin.dat", binFileName.c_str());
 }
 
 // generate date yyyy.mm.dd
@@ -227,31 +177,36 @@ string generateDate() {
     return date;
 }
 
-
 vector<int> generateVector(int size) {
     vector<int> vec;
     for (int i = 0; i < size; i++) {
         vec.push_back(i + 1);
     }
-    random_shuffle(vec.begin(), vec.end());
+    shuffle(vec.begin(), vec.end(), std::mt19937(std::random_device()()));
     return vec;
 }
 
-libraryCard generateCard(int number, int inventoryNummber) {
-    libraryCard card;
-    card.number = number;
+LibraryCard generateCard(int number, int inventoryNummber) {
+    LibraryCard card;
+    card.bookNumber = number;
     card.inventoryNumber = inventoryNummber;
     strcpy_s(card.issueDate, generateDate().c_str());
     strcpy_s(card.returnDate, generateDate().c_str());
     return card;
 }
 
-void generateBinFile(const string& binFileName, int count) {
+void generateBinFile(const string &binFileName, int count) {
     ofstream binFile(binFileName, ios::binary);
     vector<int> vec = generateVector(count);
     for (int i = 0; i < count; i++) {
-        libraryCard card = generateCard(i + 1, vec.at(i));
-        binFile.write((char *) &card, sizeof(libraryCard));
+        LibraryCard card = generateCard(i + 1, vec.at(i));
+        binFile.write((char *) &card, sizeof(LibraryCard));
     }
+    binFile.close();
+}
+
+void addCard(const string &binFileName, LibraryCard card) {
+    ofstream binFile(binFileName, ios::binary | ios::app);
+    binFile.write((char *) &card, sizeof(LibraryCard));
     binFile.close();
 }
