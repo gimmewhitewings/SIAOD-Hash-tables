@@ -21,6 +21,9 @@
     <ClInclude Include="..\..\СИАОД, Текстовый и двоичный файлы\СИАОД, Текстовый и двоичный файлы\binWork.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="HashBinary.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
