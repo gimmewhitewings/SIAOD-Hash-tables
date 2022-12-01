@@ -108,12 +108,12 @@ void generalTest() {
 
     delete smallTable;
 
-    int bigSize = 1000;
+    int bigSize = 10000;
     HashTable *bigTable = new HashTable(bigSize);
-    cout << "Generating bin file with size 100000" << endl;
+    cout << "Generating bin file with size 10000" << endl;
     generateBinFile("test.dat", bigSize);
     // insert elements from bin file to hash table
-    cout << "Insert elements from bin file to hash table" << endl;
+    cout << "Inserting elements from bin file to hash table..." << endl;
     for (int i = 0; i < bigSize; ++i) {
         insertFromFile(bigTable, "test.dat", i);
     }
