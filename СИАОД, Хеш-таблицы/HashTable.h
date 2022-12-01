@@ -64,23 +64,23 @@ int HashTable::firstHash(int key, unsigned tableSize) {
     int hash = 0;
     int keyLength = 0;
     int keyCopy = key;
-    while (keyCopy > 0) {
+    while (keyCopy > 0) { // get key length
         keyCopy /= 10;
         keyLength++;
     }
-    int *keyArray = new int[keyLength];
-    for (int i = 0; i < keyLength; i++) {
-        keyArray[i] = key % 10;
-        key /= 10;
+    int *keyArray = new int[keyLength]; // create array of key digits
+    for (int i = 0; i < keyLength; i++) { // fill array of key digits
+        keyArray[i] = key % 10; // get last digit
+        key /= 10; // delete last digit
     }
-    for (int i = 0; i < keyLength; i += 2) {
-        if (i + 1 < keyLength)
-            hash += keyArray[i] * 10 + keyArray[i + 1];
-        else
-            hash += keyArray[i];
+    for (int i = 0; i < keyLength; i += 2) { // sum every second digit
+        if (i + 1 < keyLength) // if there is a second digit
+            hash += keyArray[i] * 10 + keyArray[i + 1]; // sum two digits
+        else // if there is only one digit
+            hash += keyArray[i]; // sum one digit
     }
-    delete[] keyArray;
-    return hash % tableSize;
+    delete[] keyArray; // delete array of key digits
+    return hash % tableSize; // return hash
 }
 
 // second hash
@@ -91,20 +91,20 @@ int HashTable::secondHash(int key, unsigned size) {
 inline void HashTable::resizeTable() {
     HashTableRow *oldTable = table;
     unsigned oldSize = size;
-    size = getPrimeNumber(size * 2);
+    size = getPrimeNumber(size * 2); // get new size
     table = new HashTableRow[size];
     closedAddresses = 0;
     for (unsigned i = 0; i < oldSize; i++) {
-        if (oldTable[i].keyInventoryNumber != 0) {
+        if (oldTable[i].keyInventoryNumber != 0) { // if cell is not empty
             LibraryCard card;
             card.inventoryNumber = oldTable[i].keyInventoryNumber;
             card.bookNumber = oldTable[i].number;
             strcpy_s(card.issueDate, oldTable[i].issueDate);
             strcpy_s(card.returnDate, oldTable[i].returnDate);
-            insertElement(&card);
+            insertElement(&card); // insert element to new table
         }
     }
-    delete[] oldTable;
+    delete[] oldTable; // delete old table
 }
 
 HashTable::HashTable(unsigned size) {
@@ -124,14 +124,14 @@ void HashTable::insertElement(LibraryCard *libraryCard) {
     int index = firstHash(key, size);
     int second = secondHash(key, size);
 
-    while (table[index].keyInventoryNumber > 0) {
-        index = (index + second) % size;
+    while (table[index].keyInventoryNumber > 0) { // while cell is not empty
+        index = (index + second) % size; // get next index
     }
 
     table[index] = *currentElement;
     this->closedAddresses++;
 
-    if (closedAddresses / (double) size > 0.75) {
+    if (closedAddresses / (double) size > 0.75) { // if table is full more than 75%
         this->resizeTable();
     }
 }
@@ -139,14 +139,14 @@ void HashTable::insertElement(LibraryCard *libraryCard) {
 inline HashTableRow *HashTable::getElement(int key) {
     int index = firstHash(key, size);
     int second = secondHash(key, size);
-    while (table[index].keyInventoryNumber > 0) {
-        if (table[index].keyInventoryNumber == key) {
-            return &table[index];
-        } else {
-            index = (index + second) % size;
+    while (table[index].keyInventoryNumber > 0) { // while cell is not empty
+        if (table[index].keyInventoryNumber == key) { // if key is found
+            return &table[index]; // return pointer to element
+        } else { // if key is not found
+            index = (index + second) % size; // get next index
         }
     }
-    return nullptr;
+    return nullptr; // if key is not found
 }
 
 
@@ -187,23 +187,24 @@ inline void HashTable::printTable() {
 
 void HashTable::deleteElement(int key) {
     int index = firstHash(key, this->size);
+    int second = secondHash(key, this->size);
     while (table[index].keyInventoryNumber != 0) {
         if (table[index].keyInventoryNumber == key) {
-            table[index].keyInventoryNumber = -1;
+            table[index].keyInventoryNumber = -1; // mark cell as deleted
             return;
-        } else {
-            index = (index + secondHash(key, this->size)) % this->size;
-        }
+        } else
+            index = (index + second) % this->size; // get next index
     }
 }
 
+// get first prime number greater than number
 unsigned HashTable::getPrimeNumber(unsigned number) {
     unsigned primeNumber = number;
     bool isPrime = false;
     while (!isPrime) {
         primeNumber++;
         isPrime = true;
-        for (unsigned i = 2; i < primeNumber; i++) {
+        for (unsigned i = 2; i < (int) sqrt(primeNumber); i++) { // check if number is prime
             if (primeNumber % i == 0) {
                 isPrime = false;
                 break;

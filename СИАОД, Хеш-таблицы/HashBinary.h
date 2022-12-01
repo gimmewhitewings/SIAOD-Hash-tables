@@ -6,23 +6,23 @@
 using namespace std;
 
 void insertFromFile(HashTable *table, const char *fileName, int key) {
-    LibraryCard *newCard = getCardPtrByKey(fileName, key);
+    LibraryCard *newCard = getCardPtrByKey(fileName, key); // get card from binary file
     if (newCard)
-        table->insertElement(newCard);
+        table->insertElement(newCard); // insert card to hash table
 }
 
 void deleteFromFileAndTable(HashTable *table, const char *fileName, int key) {
-    LibraryCard *newCard = getCardPtrByKey(fileName, key);
+    LibraryCard *newCard = getCardPtrByKey(fileName, key); // get card from binary file
     if (newCard) {
-        table->deleteElement(key);
-        deleteCardByKey(fileName, key);
+        table->deleteElement(key); // delete card from hash table
+        deleteCardByKey(fileName, key); // delete card from binary file
     }
 }
 
 LibraryCard *findInFileWithHashTable(HashTable *table, const char *fileName, int key) {
-    LibraryCard *card = getCardPtrByKey(fileName, key);
+    LibraryCard *card = getCardPtrByKey(fileName, key); // get card from binary file
     if (card) {
-        int number = table->getElement(key)->number;
+        int number = table->getElement(key)->number; // get card from hash table
         return getCardPtrByNumber(fileName, number);
     }
     return nullptr;
