@@ -4,7 +4,7 @@
 #include "HashTable.h"
 #include "HashBinary.h"
 
-void testHashTable() {
+void testHashT() {
     HashTable *table = new HashTable(10);
     // insert element
     cout << "Insert element with key '1'" << endl;
@@ -19,8 +19,8 @@ void testHashTable() {
     table->printTable();
     cout << endl << endl;
     // insert 10 elements for resize
-    cout << "Insert 10 elements for resize" << endl;
-    for (int i = 2; i < 12; i++) {
+    cout << "Insert 9 elements for resize" << endl;
+    for (int i = 2; i < 11; i++) {
         LibraryCard newCard = LibraryCard(i, i, "01.01.2001", "01.01.2001");
         table->insertElement(&newCard);
     }
@@ -46,7 +46,7 @@ void testHashTable() {
     cout << endl << endl;
 }
 
-void testBinWork() {
+void testBinF() {
     // create bin file from txt file
     cout << "Create bin file from txt file" << endl;
     txtToBin("test.txt", "test.dat");
@@ -63,6 +63,18 @@ void testBinWork() {
     deleteCardByKey("test.dat", 1);
     printBinFile("test.dat");
     cout << endl << endl;
+    // get card from bin file by number
+    cout << "Get card from bin file by number" << endl;
+    LibraryCard *cardPtr = getCardPtrByNumber("test.dat", 2);
+    if (cardPtr) {
+        cout << "Found card with number '2'" << endl;
+        cout << "Key: " << cardPtr->inventoryNumber << endl;
+        cout << "Number: " << cardPtr->bookNumber << endl;
+        cout << "Issue date: " << cardPtr->issueDate << endl;
+        cout << "Return date: " << cardPtr->returnDate << endl;
+    } else {
+        cout << "Card with number '2' not found" << endl;
+    }
 }
 
 void testHashBinary() {
@@ -108,13 +120,13 @@ void generalTest() {
 
     delete smallTable;
 
-    int bigSize = 10000;
+    int bigSize = 300000;
     HashTable *bigTable = new HashTable(bigSize);
-    cout << "Generating bin file with size 10000" << endl;
+    cout << "Generating bin file with size 300000" << endl;
     generateBinFile("test.dat", bigSize);
     // insert elements from bin file to hash table
     cout << "Inserting elements from bin file to hash table..." << endl;
-    for (int i = 0; i < bigSize; ++i) {
+    for (int i = 1; i < bigSize; i++) {
         insertFromFile(bigTable, "test.dat", i);
     }
     cout << "Inserting elements from bin file to hash table finished" << endl;

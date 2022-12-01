@@ -89,25 +89,6 @@ void printBinFile(const string &binFileName) {
     }
 }
 
-string getCardDataByNumber(const string &binFileName, int number) {
-    ifstream binFile(binFileName, ios::in | ios::binary);
-    LibraryCard card{};
-    string result;
-    binFile.seekg(0, ios::beg);
-    binFile.seekg(sizeof(card) * (number - 1), ios::beg);
-    if (binFile.read((char *) &card,
-                     sizeof(LibraryCard))) // Check if there is a card with this number
-    {
-        result = to_string(card.bookNumber) + '\n'
-                 + to_string(card.inventoryNumber) + '\n'
-                 + card.issueDate + '\n'
-                 + card.returnDate;
-        binFile.close();
-        return result;
-    }
-    binFile.close();
-    return "No such card";
-}
 
 LibraryCard *getCardPtrByNumber(const string &binFileName, int number) {
     ifstream binFile(binFileName, ios::in | ios::binary);
@@ -160,6 +141,7 @@ bool deleteCardByKey(const string &binFileName, int key) {
     binFile.close();
     return false;
 }
+
 
 // generate date yyyy.mm.dd
 string generateDate() {

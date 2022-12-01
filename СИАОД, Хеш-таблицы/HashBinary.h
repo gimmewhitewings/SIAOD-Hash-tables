@@ -6,7 +6,7 @@
 using namespace std;
 
 void insertFromFile(HashTable *table, const char *fileName, int key) {
-    LibraryCard *newCard = getCardPtrByKey(fileName, key); // get card from binary file
+    LibraryCard *newCard = getCardPtrByNumber(fileName, key); // get card from binary file
     if (newCard)
         table->insertElement(newCard); // insert card to hash table
 }

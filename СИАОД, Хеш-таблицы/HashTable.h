@@ -155,7 +155,7 @@ inline void HashTable::printTable() {
     string horizontalDelimeter;
     string verticalDelimeter = " | ";
 
-    for (int i = 0; i < indexFieldSize + 55; i++) {
+    for (int i = 0; i < indexFieldSize + 55; i++) { // create horizontal delimeter
         horizontalDelimeter += "_";
     }
 
@@ -167,7 +167,7 @@ inline void HashTable::printTable() {
          << setw(10) << "returnDate" << verticalDelimeter << endl;
     cout << horizontalDelimeter << endl;
 
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) { // print table
         cout << "| " << setw(indexFieldSize)
              << i + 1 << verticalDelimeter;
         if (table[i].keyInventoryNumber > 0) {
