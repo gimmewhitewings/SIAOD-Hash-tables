@@ -32,8 +32,8 @@ struct LibraryCard {
 };
 
 void txtToBin(const string &txtFileName, const string &binFileName) {
-    ifstream txtFile(txtFileName);
-    ofstream binFile(binFileName);
+    ifstream txtFile(txtFileName, ios::in);
+    ofstream binFile(binFileName, ios::binary);
     while (!txtFile.eof()) {
         LibraryCard newCard{};
         string issueDate;
@@ -54,7 +54,7 @@ void txtToBin(const string &txtFileName, const string &binFileName) {
 
 void binToTxt(const string &txtFileName, const string &binFileName) {
     ofstream txtFile(txtFileName);
-    ifstream binFile(binFileName);
+    ifstream binFile(binFileName, ios::binary);
     if (binFile.good()) {
         LibraryCard newCard{};
         binFile.read((char *) &newCard, sizeof(LibraryCard));
@@ -90,13 +90,13 @@ void printBinFile(const string &binFileName) {
 }
 
 string getCardDataByNumber(const string &binFileName, int number) {
-    ifstream binFile(binFileName);
+    ifstream binFile(binFileName, ios::in | ios::binary);
     LibraryCard card{};
     string result;
     binFile.seekg(0, ios::beg);
     binFile.seekg(sizeof(card) * (number - 1), ios::beg);
     if (binFile.read((char *) &card,
-                     sizeof(LibraryCard))) // Проверка на существование записи с таким порядковым номером в файле
+                     sizeof(LibraryCard))) // Check if there is a card with this number
     {
         result = to_string(card.bookNumber) + '\n'
                  + to_string(card.inventoryNumber) + '\n'
@@ -106,7 +106,7 @@ string getCardDataByNumber(const string &binFileName, int number) {
         return result;
     }
     binFile.close();
-    return "Запись с таким номером не найдена";
+    return "No such card";
 }
 
 LibraryCard *getCardPtrByNumber(const string &binFileName, int number) {
@@ -114,7 +114,7 @@ LibraryCard *getCardPtrByNumber(const string &binFileName, int number) {
     LibraryCard *card = new LibraryCard;
     binFile.seekg(sizeof(LibraryCard) * (number - 1), ios::beg);
     if (binFile.read((char *) card,
-                     sizeof(LibraryCard))) // Проверка на существование записи с таким порядковым номером в файле
+                     sizeof(LibraryCard))) // Check if there is a record with such a sequential number in the file
     {
         binFile.close();
         return card;
@@ -143,22 +143,20 @@ bool deleteCardByKey(const string &binFileName, int key) {
     LibraryCard lastCard{};
     LibraryCard currentCard{};
     fstream binFile(binFileName, ios::in | ios::out | ios::binary);
-    binFile.seekg(-(int) sizeof(LibraryCard), ios::end); // Перемещаемся на позицию перед последней записью
-    binFile.read((char *) &lastCard, sizeof(LibraryCard)); // Считываем значение последней карточки
-    binFile.seekg(0, ios::beg); // Перемещаемся в начало файла
+    binFile.seekg(-(int) sizeof(LibraryCard), ios::end);
+    binFile.read((char *) &lastCard, sizeof(LibraryCard));
+    binFile.seekg(0, ios::beg);
     while (binFile.good()) {
-        // Считываем по очереди записи в файле
         binFile.read((char *) &currentCard, sizeof(LibraryCard));
-        if (currentCard.inventoryNumber == key) // Если нашли подходящую по ключу запись
+        if (currentCard.inventoryNumber == key)
         {
-            binFile.seekg(-(int) (sizeof(LibraryCard)), ios::cur); // Возвращаемся на одну позицию назад
+            binFile.seekg(-(int) (sizeof(LibraryCard)), ios::cur);
             binFile.write(reinterpret_cast<const char *>(&lastCard),
-                          sizeof(LibraryCard)); // Записываем значение последеней записи с заменой текущих данных
+                          sizeof(LibraryCard));
             binFile.close();
             return true;
         }
     }
-    // Если ничего не нашлось, закрываем файл и возвращаем отрицательный результат выполнения функции
     binFile.close();
     return false;
 }
@@ -186,10 +184,10 @@ vector<int> generateVector(int size) {
     return vec;
 }
 
-LibraryCard generateCard(int number, int inventoryNummber) {
+LibraryCard generateCard(int inventoryNumber, int bookNumber) {
     LibraryCard card;
-    card.bookNumber = number;
-    card.inventoryNumber = inventoryNummber;
+    card.inventoryNumber = inventoryNumber;
+    card.bookNumber = bookNumber;
     strcpy_s(card.issueDate, generateDate().c_str());
     strcpy_s(card.returnDate, generateDate().c_str());
     return card;

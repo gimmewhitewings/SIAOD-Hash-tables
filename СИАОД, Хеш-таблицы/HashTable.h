@@ -57,7 +57,6 @@ public:
 
     void printTable();
 
-    unsigned getSize();
 };
 
 // folding hash
@@ -153,7 +152,7 @@ inline HashTableRow *HashTable::getElement(int key) {
 
 inline void HashTable::printTable() {
     int indexFieldSize = to_string(size).length();
-    string horizontalDelimeter = "";
+    string horizontalDelimeter;
     string verticalDelimeter = " | ";
 
     for (int i = 0; i < indexFieldSize + 55; i++) {
@@ -196,10 +195,6 @@ void HashTable::deleteElement(int key) {
             index = (index + secondHash(key, this->size)) % this->size;
         }
     }
-}
-
-unsigned HashTable::getSize() {
-    return size;
 }
 
 unsigned HashTable::getPrimeNumber(unsigned number) {

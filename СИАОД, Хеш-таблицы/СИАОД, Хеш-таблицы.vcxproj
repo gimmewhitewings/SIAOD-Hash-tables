@@ -130,6 +130,7 @@
     <ClInclude Include="..\..\СИАОД, Текстовый и двоичный файлы\СИАОД, Текстовый и двоичный файлы\binWork.h" />
     <ClInclude Include="HashBinary.h" />
     <ClInclude Include="HashTable.h" />
+    <ClInclude Include="Tests.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
